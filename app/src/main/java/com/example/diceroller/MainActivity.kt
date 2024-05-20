@@ -29,6 +29,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +42,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 @Composable
 fun DiceApp() {
     var showDialog by remember { mutableStateOf(false) }
@@ -84,6 +85,8 @@ fun DiceApp() {
 @Composable
 fun DiceWithButtonAndImage(modifier: Modifier = Modifier, probabilities: List<Double>) {
     var result by remember { mutableStateOf(1) }
+    var showGif by remember { mutableStateOf(false) }
+
     val imageResource = when (result) {
         1 -> R.drawable.dice_1
         2 -> R.drawable.dice_2
@@ -93,18 +96,35 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier, probabilities: List<Do
         else -> R.drawable.dice_6
     }
 
+    if (showGif) {
+        LaunchedEffect(Unit) {
+            delay(1000) // Duración del GIF en milisegundos
+            showGif = false
+        }
+    }
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = painterResource(imageResource),
-            contentDescription = result.toString()
-        )
+        if (showGif) {
+            Image(
+                painter = rememberImagePainter(data = "https://i.pinimg.com/originals/10/57/11/10571124e2b4d9c3f0733589a4121e96.gif"),
+                contentDescription = "Rolling dice"
+            )
+        } else {
+            Image(
+                painter = painterResource(imageResource),
+                contentDescription = result.toString()
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { result = rollDice(probabilities) }) {
-            Text(stringResource(R.string.roll))
+        Button(onClick = {
+            result = rollDice(probabilities)
+            showGif = true
+        }) {
+            Text("Roll")
         }
     }
 }
